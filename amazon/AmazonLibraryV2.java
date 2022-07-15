@@ -36,14 +36,13 @@ public class AmazonLibraryV2 {
 			if (status == true) {
 				System.out.print("Do you wanna perform new action in library again? [Y(y)/N(n)]: ");
 				String decision = SCANNER.nextLine();
-				
+
 				if (decision.toLowerCase().equals("n")) {
 					will_continue = false;
 				}
-			} 
-			else {
+			} else {
 				System.out.println("You can provide these action words: create, read, update, delete");
-			}	
+			}
 		}
 
 	}
@@ -51,7 +50,7 @@ public class AmazonLibraryV2 {
 	public Boolean performAction(String action) {
 		Book book;
 		Boolean result = true;
-		
+
 		switch (action) {
 			case "create":
 				book = createBook();
@@ -63,8 +62,11 @@ public class AmazonLibraryV2 {
 				book = retrieveBook();
 				if (book == null) {
 					printLine("There is no such book in the library.");
-				} else
+				} else {
 					printBook(book);
+					System.out.println("Reading: ".formatted(book.content));
+				}
+
 				break;
 			case "update":
 				book = updateBook();
@@ -84,7 +86,7 @@ public class AmazonLibraryV2 {
 		}
 		return result;
 	}
-	
+
 	public Book createBook() {
 		System.out.print("ASIN: ");
 		String asin = SCANNER.nextLine();
@@ -94,12 +96,17 @@ public class AmazonLibraryV2 {
 		String title = SCANNER.nextLine();
 		System.out.print("Page count: ");
 		int pageCount = SCANNER.nextInt();
+
+		// throw away the \n not consumed by nextInt()
+		SCANNER.nextLine();
+
 		System.out.print("Year published: ");
 		int publishingYear = SCANNER.nextInt();
 
-		Book book = new Book(asin, author, title, pageCount, publishingYear);
+		// throw away the \n not consumed by nextInt()
+		SCANNER.nextLine();
 
-		return book;
+		return new Book(asin, author, title, pageCount, publishingYear);
 	}
 
 	public static String getIdentifier() {
@@ -178,46 +185,5 @@ public class AmazonLibraryV2 {
 
 	static void printLine(String message) {
 		System.out.println(message);
-	}
-}
-
-class Book implements Cloneable {
-	public String asin;
-	public String author;
-	public String title;
-	public int pageCount;
-	public int publishingYear;
-
-	public Book(String asin,
-							String author,
-							String title,
-							int pageCount,
-							int publishingYear) {
-		this.asin = asin;
-		this.author = author;
-		this.title = title;
-		this.pageCount = pageCount;
-		this.publishingYear = publishingYear;
-	}
-
-	public String toString() {
-		return "%s, %s, %s, %s, %s".formatted(this.asin, this.author, this.title, this.pageCount, this.publishingYear);
-	}
-
-	public Book update (String newDetails) {
-		String[] detailsArray = newDetails.split(",");
-		
-		this.asin = detailsArray[0].strip();
-		this.author = detailsArray[1].strip();
-		this.title = detailsArray[2].strip();
-		this.pageCount = Integer.parseInt(detailsArray[3].strip());
-		this.publishingYear = Integer.parseInt(detailsArray[4].strip());
-		
-		return this;
-	}
-	
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
 	}
 }
