@@ -55,13 +55,13 @@ public class AmazonLibraryV2 {
 			case "create":
 				book = createBook();
 				LIBRARY.add(book);
-				printLine("New book added:");
+				System.out.println("New book added:");
 				printBook(book);
 				break;
 			case "read":
 				book = retrieveBook();
 				if (book == null) {
-					printLine("There is no such book in the library.");
+					System.out.println("There is no such book in the library.");
 				} else {
 					printBook(book);
 					System.out.println("Reading: ".formatted(book.content));
@@ -80,7 +80,7 @@ public class AmazonLibraryV2 {
 				}
 				break;
 			default:
-				printLine("There is no such action. Please, check your input and try again.");
+				System.out.println("There is no such action. Please, check your input and try again.");
 				result = false;
 				break;
 		}
@@ -175,15 +175,11 @@ public class AmazonLibraryV2 {
 		return book;
 	}
 
-	static void printBook(Book book) {
+	public static void printBook(Book book) {
 		System.out.println("ASIN: %s".formatted(book.asin));
 		System.out.println("Author: %s".formatted(book.author));
 		System.out.println("Title: %s".formatted(book.title));
 		System.out.println("Page count: %s".formatted(book.pageCount));
 		System.out.println("Publishing year: %s".formatted(book.publishingYear));
-	}
-
-	static void printLine(String message) {
-		System.out.println(message);
 	}
 }
