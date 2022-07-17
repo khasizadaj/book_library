@@ -1,8 +1,8 @@
-import amazon.AmazonLibraryV2;
+import amazon.AmazonLibrary;
 
 class Main {
 	public static void main(String[] args) {
-		AmazonLibraryV2 library = new AmazonLibraryV2();
+		AmazonLibrary library = new AmazonLibrary();
 		library.run();
 	}
 }
