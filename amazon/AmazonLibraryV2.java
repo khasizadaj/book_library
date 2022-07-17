@@ -43,7 +43,7 @@ public class AmazonLibraryV2 {
 					will_continue = false;
 				}
 			} else {
-				System.out.println("You can provide these action words: create, read, update, delete");
+				System.out.println("You can provide these action words: create, retrieve, update, delete");
 			}
 		}
 
@@ -64,6 +64,7 @@ public class AmazonLibraryV2 {
 				book = retrieveBook();
 				if (book == null) {
 					System.out.println("There is no such book in the library.");
+					performAction("retrieve");
 				} else {
 					book.start();
 				}
@@ -74,13 +75,16 @@ public class AmazonLibraryV2 {
 				book.display();
 				;
 				break;
-			// case "delete":
-			// book = deleteBook();
-			// if (book != null) {
-			// System.out.print("Deleted book is: ");
-			// printBook(book);
-			// }
-			// break;
+			case "delete":
+				book = deleteBook();
+				if (book == null) {
+					System.out.println("There is no such book in the library. Please, try again.");
+					performAction("delete");
+				} else {
+					System.out.println("Deleted book is ... ");
+					book.display();
+				}
+				break;
 			default:
 				System.out.println("There is no such action. Please, check your input and try again.");
 				result = false;
@@ -175,27 +179,29 @@ public class AmazonLibraryV2 {
 		book.update(newBookDetails);
 		return book;
 	}
-	// public PaperBook deleteBook() {
-	// System.out.print("ASIN: ");
-	// String identifier = getIdentifier();
 
-	// PaperBook result = null;
-	// for (int i = 0; i < LIBRARY.size(); i++) {
-	// PaperBook book = LIBRARY.get(i);
+	public Book deleteBook() {
+		Book book = retrieveBook();
 
-	// if (book.asin.equals(identifier)) {
-	// try {
-	// result = (PaperBook) book.clone();
-	// } catch (CloneNotSupportedException exc) {
-	// System.out.println("Element cannot be cloned.");
-	// }
-	// LIBRARY.remove(i);
-	// break;
-	// }
+		// Book result = null;
+		// for (int i = 0; i < LIBRARY.size(); i++) {
+		// Book currBook = LIBRARY.get(i);
 
-	// }
-	// return result;
-	// }
+		// if (book.checkIdentifier(currBook.asin)) {
+		// try {
+		// result = (PaperBook) book.clone();
+		// } catch (CloneNotSupportedException exc) {
+		// System.out.println("Element cannot be cloned.");
+		// }
+		// LIBRARY.remove(i);
+		// break;
+		// }
+
+		// }
+		LIBRARY.remove(book);
+
+		return book;
+	}
 
 	// public static void printBook(PaperBook book) {
 	// System.out.println("ASIN: %s".formatted(book.asin));
