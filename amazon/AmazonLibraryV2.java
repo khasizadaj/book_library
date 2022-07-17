@@ -20,9 +20,6 @@ public class AmazonLibraryV2 {
 	static ArrayList<Book> LIBRARY = new ArrayList<Book>();
 	static Scanner SCANNER = new Scanner(System.in);
 
-	// ASIN, Author, Title, Page count, Publishing year
-	static int BOOK_ELEMENTS_COUNT = 5;
-
 	public void run() {
 		AudioBook firstBook = new AudioBook("AB1", "AB First Author", "The Very First Book", 222, 2022, "Johnny Depp");
 		PaperBook secondBook = new PaperBook("PB1", "PB First Author", "The Very Second Book", 202, 2022, 3456);
