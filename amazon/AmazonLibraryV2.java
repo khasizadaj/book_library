@@ -20,18 +20,17 @@ public class AmazonLibraryV2 {
 	static ArrayList<Book> LIBRARY = new ArrayList<Book>();
 	static Scanner SCANNER = new Scanner(System.in);
 
-	// ASIN, Author, Title, Page count, Publishing year
-	static Integer BOOK_ELEMENTS_COUNT = 5;
-
 	public void run() {
-		Book firstBook = new Book("FB1", "First Author", "The Very First Book", 222, 2022);
+		AudioBook firstBook = new AudioBook("AB1", "AB First Author", "The Very First Book", 222, 2022, "Johnny Depp");
+		PaperBook secondBook = new PaperBook("PB1", "PB First Author", "The Very Second Book", 202, 2022, 3456);
 		LIBRARY.add(firstBook);
+		LIBRARY.add(secondBook);
 
-		Boolean will_continue = true;
+		boolean will_continue = true;
 		while (will_continue) {
 			System.out.print("What do you want to do?: ");
 			String action = SCANNER.nextLine().toLowerCase();
-			Boolean status = performAction(action);
+			boolean status = performAction(action);
 
 			if (status == true) {
 				System.out.print("Do you wanna perform new action in library again? [Y(y)/N(n)]: ");
@@ -41,42 +40,46 @@ public class AmazonLibraryV2 {
 					will_continue = false;
 				}
 			} else {
-				System.out.println("You can provide these action words: create, read, update, delete");
+				System.out.println("You can provide these action words: create, retrieve, update, delete");
 			}
 		}
 
 	}
 
-	public Boolean performAction(String action) {
+	public boolean performAction(String action) {
 		Book book;
-		Boolean result = true;
+		boolean result = true;
 
 		switch (action) {
 			case "create":
 				book = createBook();
 				LIBRARY.add(book);
 				System.out.println("New book added:");
-				printBook(book);
+				book.display();
 				break;
-			case "read":
+			case "retrieve":
 				book = retrieveBook();
 				if (book == null) {
 					System.out.println("There is no such book in the library.");
+					performAction("retrieve");
 				} else {
-					printBook(book);
-					System.out.println("Reading: ".formatted(book.content));
+					book.start();
 				}
 
 				break;
 			case "update":
 				book = updateBook();
-				printBook(book);
+				book.display();
+				;
 				break;
 			case "delete":
 				book = deleteBook();
-				if (book != null) {
-					System.out.print("Deleted book is: ");
-					printBook(book);
+				if (book == null) {
+					System.out.println("There is no such book in the library. Please, try again.");
+					performAction("delete");
+				} else {
+					System.out.println("Deleted book is ... ");
+					book.display();
 				}
 				break;
 			default:
@@ -88,6 +91,13 @@ public class AmazonLibraryV2 {
 	}
 
 	public Book createBook() {
+		System.out.println("What type of book do you want to add? (type number/id): \n1. Paper book \n2. Audio book");
+		System.out.print("Type your choice: ");
+		int bookType = SCANNER.nextInt();
+
+		// throw away the \n not consumed by nextInt()
+		SCANNER.nextLine();
+
 		System.out.print("ASIN: ");
 		String asin = SCANNER.nextLine();
 		System.out.print("Author: ");
@@ -106,7 +116,21 @@ public class AmazonLibraryV2 {
 		// throw away the \n not consumed by nextInt()
 		SCANNER.nextLine();
 
-		return new Book(asin, author, title, pageCount, publishingYear);
+		Book book;
+		if (bookType == 1) {
+			System.out.print("Copy count: ");
+			int copyCount = SCANNER.nextInt();
+
+			// throw away the \n not consumed by nextInt()
+			SCANNER.nextLine();
+
+			book = new PaperBook(asin, author, title, pageCount, publishingYear, copyCount);
+		} else {
+			System.out.print("Narrator: ");
+			String narrator = SCANNER.nextLine();
+			book = new AudioBook(asin, author, title, pageCount, publishingYear, narrator);
+		}
+		return book;
 	}
 
 	public static String getIdentifier() {
@@ -119,12 +143,11 @@ public class AmazonLibraryV2 {
 	public Book retrieveBook() {
 
 		System.out.print("Please, provide ASIN: ");
-		String identifier = getIdentifier().toLowerCase();
+		String identifier = getIdentifier();
 
 		Book retrievedBook = null;
 		for (Book book : LIBRARY) {
-			String bookIdentifier = book.asin.toLowerCase();
-			if (bookIdentifier.equals(identifier)) {
+			if (book.checkIdentifier(identifier)) {
 				retrievedBook = book;
 			}
 		}
@@ -132,33 +155,11 @@ public class AmazonLibraryV2 {
 		return retrievedBook;
 	}
 
-	public Book deleteBook() {
-		System.out.print("ASIN: ");
-		String identifier = getIdentifier();
-
-		Book result = null;
-		for (int i = 0; i < LIBRARY.size(); i++) {
-			Book book = LIBRARY.get(i);
-
-			if (book.asin.equals(identifier)) {
-				try {
-					result = (Book) book.clone();
-				} catch (CloneNotSupportedException exc) {
-					System.out.println("Element cannot be cloned.");
-				}
-				LIBRARY.remove(i);
-				break;
-			}
-
-		}
-		return result;
-	}
-
 	public Book updateBook() {
 		Book book = retrieveBook();
 
-		System.out.println("Current book details");
-		printBook(book);
+		System.out.println("Current book details ...");
+		book.display();
 
 		System.out.println("Copy the line below and modify book details as you like.");
 		String bookDetails = book.toString();
@@ -167,19 +168,43 @@ public class AmazonLibraryV2 {
 
 		String newBookDetails = SCANNER.nextLine();
 
-		if (bookDetails.equals(newBookDetails) != true) {
-			book.update(newBookDetails);
-		} else
+		if (bookDetails.equals(newBookDetails)) {
 			System.out.println("Book details were not updated. It is the same.");
+			return book;
+		}
+
+		book.update(newBookDetails);
+		return book;
+	}
+
+	public Book deleteBook() {
+		Book book = retrieveBook();
+
+		// Book result = null;
+		// for (int i = 0; i < LIBRARY.size(); i++) {
+		// Book currBook = LIBRARY.get(i);
+
+		// if (book.checkIdentifier(currBook.asin)) {
+		// try {
+		// result = (PaperBook) book.clone();
+		// } catch (CloneNotSupportedException exc) {
+		// System.out.println("Element cannot be cloned.");
+		// }
+		// LIBRARY.remove(i);
+		// break;
+		// }
+
+		// }
+		LIBRARY.remove(book);
 
 		return book;
 	}
 
-	public static void printBook(Book book) {
-		System.out.println("ASIN: %s".formatted(book.asin));
-		System.out.println("Author: %s".formatted(book.author));
-		System.out.println("Title: %s".formatted(book.title));
-		System.out.println("Page count: %s".formatted(book.pageCount));
-		System.out.println("Publishing year: %s".formatted(book.publishingYear));
-	}
+	// public static void printBook(PaperBook book) {
+	// System.out.println("ASIN: %s".formatted(book.asin));
+	// System.out.println("Author: %s".formatted(book.author));
+	// System.out.println("Title: %s".formatted(book.title));
+	// System.out.println("Page count: %s".formatted(book.pageCount));
+	// System.out.println("Publishing year: %s".formatted(book.publishingYear));
+	// }
 }
